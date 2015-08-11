@@ -41,6 +41,7 @@ public class ImageLoader {
 	private Context mContext;
 	private ImageMemoryCache mImageMemoryCache;
 	private ImageDiskCache mImageDiskCache;
+	private OnImageChangeListener mOnImageChangeListener;
 
 	// Attributes
 	private boolean mUseMemoryCache;
@@ -82,7 +83,12 @@ public class ImageLoader {
 			}
 		}
 
-		pImageView.setAlpha(0f);
+		if(mOnImageChangeListener != null) {
+			mOnImageChangeListener.onImageChangeTaskStart(pImageView);
+		} else {
+			pImageView.setAlpha(0f);
+		}
+
 		new LoadImageTask(pImageView, pImagePath).execute();
 	}
 
@@ -151,23 +157,24 @@ public class ImageLoader {
 
 		protected void onPostExecute(Bitmap pResultBitmap) {
 			ImageView lImageView = mImageViewReference.get();
-			if (pResultBitmap != null && lImageView != null && !isCancelled()) {
-				setImageWithFadeIn(lImageView, pResultBitmap); // set image with fade in
+			if (pResultBitmap != null && lImageView != null) {
+				if(mOnImageChangeListener != null) {
+					mOnImageChangeListener.onImageChangeTaskComplete(lImageView, pResultBitmap);
+				} else {
+					lImageView.setImageBitmap(pResultBitmap);
+					lImageView.setAlpha(1f);
+				}
 			}
 		}
-
 	}
 
-	// Method for set image wit fade in
-	private static void setImageWithFadeIn(ImageView pImageView, Bitmap pBitmap) {
-		if (pImageView != null && pBitmap != null) {
-			pImageView.setImageBitmap(pBitmap);
-			ObjectAnimator fadeIn = ObjectAnimator.ofFloat(pImageView, "alpha", 0.0f, 1f);
-			fadeIn.setDuration(1000);
-			AnimatorSet fadeSet = new AnimatorSet();
-			fadeSet.play(fadeIn);
-			fadeSet.start();
-		}
+	public void setOnImageChangeListener(OnImageChangeListener pOnImageChangeListener) {
+		mOnImageChangeListener = pOnImageChangeListener;
+	}
+
+	public interface OnImageChangeListener {
+		public abstract void onImageChangeTaskStart(ImageView imageView);
+		public abstract void onImageChangeTaskComplete(ImageView imageView, Bitmap bitmap);
 	}
 
 }

@@ -21,8 +21,11 @@
 
 package com.mabi87.imageloadersample;
 
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
@@ -55,7 +58,26 @@ public class ListActivity extends ActionBarActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		mImageLoader = new ImageLoader(getApplicationContext(), true, true);
+		mImageLoader = new ImageLoader(getApplicationContext());
+
+		mImageLoader.setOnImageChangeListener(new ImageLoader.OnImageChangeListener() {
+			@Override
+			public void onImageChangeTaskStart(ImageView imageView) {
+				// change alpha for fade in
+				imageView.setAlpha(0f);
+			}
+
+			@Override
+			public void onImageChangeTaskComplete(ImageView imageView, Bitmap bitmap) {
+				// set image with fade in
+				imageView.setImageBitmap(bitmap);
+				ObjectAnimator fadeIn = ObjectAnimator.ofFloat(imageView, "alpha", 0.0f, 1f);
+				fadeIn.setDuration(1000);
+				AnimatorSet fadeSet = new AnimatorSet();
+				fadeSet.play(fadeIn);
+				fadeSet.start();
+			}
+		});
 		
 		// Load Layout Components
 		setContentView(R.layout.activity_list);

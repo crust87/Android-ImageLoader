@@ -2,32 +2,42 @@
 Async Image Loader for Android
 
 ## Example
-```java
-private ImageLoader mImageLoader;
 
-protected void onCreate(Bundle savedInstanceState) {
-	super.onCreate(savedInstanceState);
-	
-	mImageLoader = new ImageLoader(getApplicationContext());
-	
-	// ...
-}
+create ImageLoader
+```java
+mImageLoader = new ImageLoader(getApplicationContext());
 ```
 
 or
-
 ```java
-private ImageLoader mImageLoader;
-
-protected void onCreate(Bundle savedInstanceState) {
-	super.onCreate(savedInstanceState);
-
-	mImageLoader = new ImageLoader(getApplicationContext(), isMemoryCacheEnable, isDiskCacheEnable);
-
-	// ...
-}
+mImageLoader = new ImageLoader(getApplicationContext(), useMemCache, useDiskCache);
 ```
 
+set Event Listener
+onImageChangeTaskStart is called before AsyncTask execute for get image from disk or internet
+onImageChangeTaskComplete is called AsyncTask onPostExecute
+```java
+mImageLoader.setOnImageChangeListener(new ImageLoader.OnImageChangeListener() {
+	@Override
+	public void onImageChangeTaskStart(ImageView imageView) {
+		// change alpha for fade in
+		imageView.setAlpha(0f);
+	}
+
+	@Override
+	public void onImageChangeTaskComplete(ImageView imageView, Bitmap bitmap) {
+		// set image with fade in
+		imageView.setImageBitmap(bitmap);
+		ObjectAnimator fadeIn = ObjectAnimator.ofFloat(imageView, "alpha", 0.0f, 1f);
+		fadeIn.setDuration(1000);
+		AnimatorSet fadeSet = new AnimatorSet();
+		fadeSet.play(fadeIn);
+		fadeSet.start();
+	}
+});
+```
+
+load image with ImageLoader
 ```java
 ImageView imageView = findViewById(id);
 String imagePath = "http://some.where.image/placed.png"
