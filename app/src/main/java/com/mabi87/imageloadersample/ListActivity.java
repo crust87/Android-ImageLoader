@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,6 +45,7 @@ import com.mabi87.imageloader.ImageLoader;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ListActivity extends ActionBarActivity {
 	
@@ -61,14 +63,24 @@ public class ListActivity extends ActionBarActivity {
 		mImageLoader = new ImageLoader(getApplicationContext());
 
 		mImageLoader.setOnImageChangeListener(new ImageLoader.OnImageChangeListener() {
+			private ConcurrentHashMap<Integer, AnimatorSet> animatorOfView = new ConcurrentHashMap<Integer, AnimatorSet>();
+
 			@Override
-			public void onImageChangeTaskStart(ImageView imageView) {
+			public void onImageChange(ImageView imageView) {
+				AnimatorSet set = animatorOfView.get(imageView.hashCode());
+				if(set != null) {
+					set.cancel();
+				}
+			}
+
+			@Override
+			public void onImageLoadTaskStart(ImageView imageView) {
 				// change alpha for fade in
 				imageView.setAlpha(0f);
 			}
 
 			@Override
-			public void onImageChangeTaskComplete(ImageView imageView, Bitmap bitmap) {
+			public void onImageLoadTaskComplete(ImageView imageView, Bitmap bitmap) {
 				// set image with fade in
 				imageView.setImageBitmap(bitmap);
 				ObjectAnimator fadeIn = ObjectAnimator.ofFloat(imageView, "alpha", 0.0f, 1f);
@@ -76,6 +88,7 @@ public class ListActivity extends ActionBarActivity {
 				AnimatorSet fadeSet = new AnimatorSet();
 				fadeSet.play(fadeIn);
 				fadeSet.start();
+				animatorOfView.put(imageView.hashCode(), fadeSet);
 			}
 		});
 		

@@ -18,14 +18,24 @@ onImageChangeTaskStart is called before AsyncTask execute for get image from dis
 onImageChangeTaskComplete is called AsyncTask onPostExecute<br/>
 ```java
 mImageLoader.setOnImageChangeListener(new ImageLoader.OnImageChangeListener() {
+	private ConcurrentHashMap<Integer, AnimatorSet> animatorOfView = new ConcurrentHashMap<Integer, AnimatorSet>();
+
 	@Override
-	public void onImageChangeTaskStart(ImageView imageView) {
+	public void onImageChange(ImageView imageView) {
+		AnimatorSet set = animatorOfView.get(imageView.hashCode());
+		if(set != null) {
+			set.cancel();
+		}
+	}
+
+	@Override
+	public void onImageLoadTaskStart(ImageView imageView) {
 		// change alpha for fade in
 		imageView.setAlpha(0f);
 	}
 
 	@Override
-	public void onImageChangeTaskComplete(ImageView imageView, Bitmap bitmap) {
+	public void onImageLoadTaskComplete(ImageView imageView, Bitmap bitmap) {
 		// set image with fade in
 		imageView.setImageBitmap(bitmap);
 		ObjectAnimator fadeIn = ObjectAnimator.ofFloat(imageView, "alpha", 0.0f, 1f);
@@ -33,6 +43,7 @@ mImageLoader.setOnImageChangeListener(new ImageLoader.OnImageChangeListener() {
 		AnimatorSet fadeSet = new AnimatorSet();
 		fadeSet.play(fadeIn);
 		fadeSet.start();
+		animatorOfView.put(imageView.hashCode(), fadeSet);
 	}
 });
 ```

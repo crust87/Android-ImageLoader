@@ -21,18 +21,16 @@
 
 package com.mabi87.imageloader;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.lang.ref.WeakReference;
-import java.util.concurrent.ConcurrentHashMap;
-
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.widget.ImageView;
+
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.lang.ref.WeakReference;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ImageLoader {
 	private static ConcurrentHashMap<Integer, String> PATH_OF_VIEW = new ConcurrentHashMap<Integer, String>(); // Bitmap path of Image view
@@ -69,7 +67,12 @@ public class ImageLoader {
 			return;
 		}
 
+		// set current image path of image view
 		PATH_OF_VIEW.put(viewHash, pImagePath);
+
+		if(mOnImageChangeListener != null) {
+			mOnImageChangeListener.onImageChange(pImageView);
+		}
 
 		// if bitmap is cached, set image and return
 		if(mUseMemoryCache) {
@@ -84,7 +87,7 @@ public class ImageLoader {
 		}
 
 		if(mOnImageChangeListener != null) {
-			mOnImageChangeListener.onImageChangeTaskStart(pImageView);
+			mOnImageChangeListener.onImageLoadTaskStart(pImageView);
 		} else {
 			pImageView.setAlpha(0f);
 		}
@@ -157,9 +160,11 @@ public class ImageLoader {
 
 		protected void onPostExecute(Bitmap pResultBitmap) {
 			ImageView lImageView = mImageViewReference.get();
-			if (pResultBitmap != null && lImageView != null) {
+
+			// if current path of image view is same as loaded image path, change image
+			if (pResultBitmap != null && lImageView != null && mImagePath.equals(PATH_OF_VIEW.get(lImageView.hashCode()))) {
 				if(mOnImageChangeListener != null) {
-					mOnImageChangeListener.onImageChangeTaskComplete(lImageView, pResultBitmap);
+					mOnImageChangeListener.onImageLoadTaskComplete(lImageView, pResultBitmap);
 				} else {
 					lImageView.setImageBitmap(pResultBitmap);
 					lImageView.setAlpha(1f);
@@ -173,8 +178,9 @@ public class ImageLoader {
 	}
 
 	public interface OnImageChangeListener {
-		public abstract void onImageChangeTaskStart(ImageView imageView);
-		public abstract void onImageChangeTaskComplete(ImageView imageView, Bitmap bitmap);
+		public abstract void onImageChange(ImageView imageView);
+		public abstract void onImageLoadTaskStart(ImageView imageView);
+		public abstract void onImageLoadTaskComplete(ImageView imageView, Bitmap bitmap);
 	}
 
 }
