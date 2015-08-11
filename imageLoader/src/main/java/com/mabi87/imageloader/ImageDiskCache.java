@@ -97,10 +97,16 @@ public class ImageDiskCache implements CacheInterface<String, Bitmap> {
 
 	}
 
-	public static final String getFileName(final String s) throws NoSuchAlgorithmException {
+	/**
+	 * @param source
+	 * 				the String url of image source located.
+	 * @return
+	 * 				the String value of hashed source with ".png"
+	 */
+	public static final String getFileName(String source) throws NoSuchAlgorithmException {
 		// Create MD5 Hash
 		MessageDigest digest = MessageDigest.getInstance("MD5");
-		digest.update(s.getBytes());
+		digest.update(source.getBytes());
 		byte messageDigest[] = digest.digest();
 		
 		// Create Hex String

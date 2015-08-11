@@ -46,10 +46,23 @@ public class ImageLoader {
 	private boolean mUseDiskCache;
 	
 	// Constructor
+
+	/**
+	 * @param pContext
+	 * 				the application context.
+	 */
 	public ImageLoader(Context pContext) {
 		this(pContext, true, true);
 	}
 
+	/**
+	 * @param pContext
+	 * 				the application context.
+	 * @param useMemoryCache
+	 * 				the boolean value whether use memory cache.
+	 * @param useDiskCache
+	 * 				the boolean value whether use disk cache.
+	 */
 	public ImageLoader(Context pContext, boolean useMemoryCache, boolean useDiskCache) {
 		mContext = pContext;
 		mImageMemoryCache = ImageMemoryCache.getInstance();
@@ -58,41 +71,47 @@ public class ImageLoader {
 		mUseDiskCache = useDiskCache;
 	}
 
-	public void loadImage(ImageView pImageView, String pImagePath) {
-		int viewHash = pImageView.hashCode();
+	/**
+	 * @param imageView
+	 * 				the ImageView target of loading
+	 * @param imagePath
+	 * 				the String url of image source located.
+	 */
+	public void loadImage(ImageView imageView, String imagePath) {
+		int viewHash = imageView.hashCode();
 		String postPath = PATH_OF_VIEW.get(viewHash);
 
 		// check if image already set
-		if(pImagePath.equals(postPath)) {
+		if(imagePath.equals(postPath)) {
 			return;
 		}
 
 		// set current image path of image view
-		PATH_OF_VIEW.put(viewHash, pImagePath);
+		PATH_OF_VIEW.put(viewHash, imagePath);
 
 		if(mOnImageChangeListener != null) {
-			mOnImageChangeListener.onImageChange(pImageView);
+			mOnImageChangeListener.onImageChange(imageView);
 		}
 
 		// if bitmap is cached, set image and return
 		if(mUseMemoryCache) {
-			Bitmap lPicture = mImageMemoryCache.get(pImagePath);
+			Bitmap lPicture = mImageMemoryCache.get(imagePath);
 
 			if (lPicture != null) {
-				pImageView.setImageBitmap(lPicture);
-				pImageView.setAlpha(1f);
+				imageView.setImageBitmap(lPicture);
+				imageView.setAlpha(1f);
 
 				return;
 			}
 		}
 
 		if(mOnImageChangeListener != null) {
-			mOnImageChangeListener.onImageLoadTaskStart(pImageView);
+			mOnImageChangeListener.onImageLoadTaskStart(imageView);
 		} else {
-			pImageView.setAlpha(0f);
+			imageView.setAlpha(0f);
 		}
 
-		new LoadImageTask(pImageView, pImagePath).execute();
+		new LoadImageTask(imageView, imagePath).execute();
 	}
 
 	private class LoadImageTask extends AsyncTask<Void, Void, Bitmap> {
@@ -101,15 +120,16 @@ public class ImageLoader {
 		private WeakReference<ImageView> mImageViewReference;
 		private String mImagePath;
 
-		public LoadImageTask(ImageView pImageView, String pImagePath) {
+		/**
+		 * @param imageView
+		 * 				the ImageView target of loading
+		 * @param imagePath
+		 * 				the String url of image source located.
+		 */
+		public LoadImageTask(ImageView imageView, String imagePath) {
 			// Set variables
-			mImageViewReference = new WeakReference<ImageView>(pImageView);
-			mImagePath = pImagePath;
-		}
-
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
+			mImageViewReference = new WeakReference<ImageView>(imageView);
+			mImagePath = imagePath;
 		}
 
 		protected Bitmap doInBackground(Void... params) {
@@ -158,15 +178,15 @@ public class ImageLoader {
 			return lPicture;
 		}
 
-		protected void onPostExecute(Bitmap pResultBitmap) {
+		protected void onPostExecute(Bitmap result) {
 			ImageView lImageView = mImageViewReference.get();
 
 			// if current path of image view is same as loaded image path, change image
-			if (pResultBitmap != null && lImageView != null && mImagePath.equals(PATH_OF_VIEW.get(lImageView.hashCode()))) {
+			if (result != null && lImageView != null && mImagePath.equals(PATH_OF_VIEW.get(lImageView.hashCode()))) {
 				if(mOnImageChangeListener != null) {
-					mOnImageChangeListener.onImageLoadTaskComplete(lImageView, pResultBitmap);
+					mOnImageChangeListener.onImageLoadTaskComplete(lImageView, result);
 				} else {
-					lImageView.setImageBitmap(pResultBitmap);
+					lImageView.setImageBitmap(result);
 					lImageView.setAlpha(1f);
 				}
 			}
@@ -178,8 +198,24 @@ public class ImageLoader {
 	}
 
 	public interface OnImageChangeListener {
+		/**
+		 * @param imageView
+		 * 				the ImageView target of loading
+		 */
 		public abstract void onImageChange(ImageView imageView);
+
+		/**
+		 * @param imageView
+		 * 				the ImageView target of loading
+		 */
 		public abstract void onImageLoadTaskStart(ImageView imageView);
+
+		/**
+		 * @param imageView
+		 * 				the ImageView target of loading
+		 * @param bitmap
+		 * 				the Bitmap image as result
+		 */
 		public abstract void onImageLoadTaskComplete(ImageView imageView, Bitmap bitmap);
 	}
 
