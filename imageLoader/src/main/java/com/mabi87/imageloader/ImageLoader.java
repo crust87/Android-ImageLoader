@@ -41,33 +41,49 @@ public class ImageLoader {
 	private Context mContext;
 	private ImageMemoryCache mImageMemoryCache;
 	private ImageDiskCache mImageDiskCache;
+
+	// Attributes
+	private boolean mUseMemoryCache;
+	private boolean mUseDiskCache;
 	
 	// Constructor
 	public ImageLoader(Context pContext) {
+		this(pContext, true, true);
+	}
+
+	public ImageLoader(Context pContext, boolean useMemoryCache, boolean useDiskCache) {
 		mContext = pContext;
 		mImageMemoryCache = ImageMemoryCache.getInstance();
 		mImageDiskCache = new ImageDiskCache(mContext);
+		mUseMemoryCache = useMemoryCache;
+		mUseDiskCache = useDiskCache;
 	}
 
 	public void loadImage(ImageView pImageView, String pImagePath) {
 		int viewHash = pImageView.hashCode();
 		String postPath = PATH_OF_VIEW.get(viewHash);
-		
-		// if bitmap is cached, set image
-		// else execute task
-		Bitmap lPicture = mImageMemoryCache.get(pImagePath);
-		if (lPicture != null) {
-			// check if image already set
-			// else change image and put image info
-			if(!pImagePath.equals(postPath)) {
+
+		// check if image already set
+		if(pImagePath.equals(postPath)) {
+			return;
+		}
+
+		PATH_OF_VIEW.put(viewHash, pImagePath);
+
+		// if bitmap is cached, set image and return
+		if(mUseMemoryCache) {
+			Bitmap lPicture = mImageMemoryCache.get(pImagePath);
+
+			if (lPicture != null) {
 				pImageView.setImageBitmap(lPicture);
 				pImageView.setAlpha(1f);
-				PATH_OF_VIEW.put(viewHash, pImagePath);
+
+				return;
 			}
-		} else {
-			pImageView.setAlpha(0f); // this is for fade in
-			new LoadImageTask(pImageView, pImagePath).execute();
 		}
+
+		pImageView.setAlpha(0f);
+		new LoadImageTask(pImageView, pImagePath).execute();
 	}
 
 	private class LoadImageTask extends AsyncTask<Void, Void, Bitmap> {
@@ -96,10 +112,16 @@ public class ImageLoader {
 			}
 			
 			// if bitmap is cached, return image
-			lPicture = mImageDiskCache.get(mImagePath);
-			if(lPicture != null) {
-				mImageMemoryCache.put(mImagePath, lPicture);
-				return lPicture;
+			if(mUseDiskCache) {
+				lPicture = mImageDiskCache.get(mImagePath);
+
+				if(lPicture != null) {
+					if(mUseMemoryCache) {
+						mImageMemoryCache.put(mImagePath, lPicture);
+					}
+
+					return lPicture;
+				}
 			}
 
 			try {
@@ -107,8 +129,14 @@ public class ImageLoader {
 				InputStream inputStream = new java.net.URL(mImagePath).openStream();
 				lPicture = BitmapFactory.decodeStream(inputStream);
 
-				mImageDiskCache.put(mImagePath, lPicture);
-				mImageMemoryCache.put(mImagePath, lPicture);
+				if(mUseDiskCache) {
+					mImageDiskCache.put(mImagePath, lPicture);
+				}
+
+				if(mUseMemoryCache) {
+					mImageMemoryCache.put(mImagePath, lPicture);
+				}
+
 				inputStream.close();
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
@@ -125,7 +153,6 @@ public class ImageLoader {
 			ImageView lImageView = mImageViewReference.get();
 			if (pResultBitmap != null && lImageView != null && !isCancelled()) {
 				setImageWithFadeIn(lImageView, pResultBitmap); // set image with fade in
-				PATH_OF_VIEW.put(lImageView.hashCode(), mImagePath); // put image info
 			}
 		}
 

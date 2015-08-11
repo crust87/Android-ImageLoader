@@ -14,6 +14,20 @@ protected void onCreate(Bundle savedInstanceState) {
 }
 ```
 
+or
+
+```java
+private ImageLoader mImageLoader;
+
+protected void onCreate(Bundle savedInstanceState) {
+	super.onCreate(savedInstanceState);
+
+	mImageLoader = new ImageLoader(getApplicationContext(), isMemoryCacheEnable, isDiskCacheEnable);
+
+	// ...
+}
+```
+
 ```java
 ImageView imageView = findViewById(id);
 String imagePath = "http://some.where.image/placed.png"

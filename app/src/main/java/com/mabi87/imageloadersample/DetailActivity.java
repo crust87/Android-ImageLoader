@@ -21,16 +21,13 @@
 
 package com.mabi87.imageloadersample;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.mabi87.imageloader.*;
+import com.mabi87.imageloader.ImageLoader;
 
 public class DetailActivity extends ActionBarActivity {
 

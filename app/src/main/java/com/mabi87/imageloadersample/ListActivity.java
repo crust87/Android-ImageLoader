@@ -21,17 +21,11 @@
 
 package com.mabi87.imageloadersample;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -43,7 +37,10 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.mabi87.imageloader.*;
+import com.mabi87.imageloader.ImageLoader;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ListActivity extends ActionBarActivity {
 	
@@ -58,7 +55,7 @@ public class ListActivity extends ActionBarActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		mImageLoader = new ImageLoader(getApplicationContext());
+		mImageLoader = new ImageLoader(getApplicationContext(), true, true);
 		
 		// Load Layout Components
 		setContentView(R.layout.activity_list);
