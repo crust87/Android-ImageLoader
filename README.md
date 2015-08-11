@@ -14,8 +14,9 @@ mImageLoader = new ImageLoader(getApplicationContext(), useMemCache, useDiskCach
 ```
 
 set Event Listener<br/>
-onImageChangeTaskStart is called before AsyncTask execute for get image from disk or internet<br/>
-onImageChangeTaskComplete is called AsyncTask onPostExecute<br/>
+onImageChange is called before image change<br/>
+onImageLoadTaskStart is called before AsyncTask execute for get image from disk or internet<br/>
+onImageLoadTaskComplete is called AsyncTask onPostExecute<br/>
 ```java
 mImageLoader.setOnImageChangeListener(new ImageLoader.OnImageChangeListener() {
 	private ConcurrentHashMap<Integer, AnimatorSet> animatorOfView = new ConcurrentHashMap<Integer, AnimatorSet>();
