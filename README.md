@@ -57,7 +57,7 @@ String imagePath = "http://some.where.image/placed.png"
 mImageLoader.loadImage(imageView, imagePath);
 ```
 
-## Licence
+## License
 Copyright 2015 Mabi
 
 Licensed under the Apache License, Version 2.0 (the "License");<br/>
