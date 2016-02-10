@@ -1,5 +1,6 @@
-# Android-ImageLoader
-Async Image Loader for Android
+# Android-ImageLoader DEPRECATED
+Async Image Loader for Android<br/>
+no more commit.
 
 ## Example
 
